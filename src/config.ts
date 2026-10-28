@@ -11,7 +11,15 @@ const envSchema = z.object({
   FRONTEND_ORIGIN: z
     .string()
     .min(1, { message: 'FRONTEND_ORIGIN is required (CORS allow-list)' }),
-  PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  PORT: z
+    .preprocess((val) => {
+      if (val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) {
+        return 3000;
+      }
+      const num = Number(val);
+      return isNaN(num) ? 3000 : num;
+    }, z.number().int().min(1).max(65535))
+    .default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
